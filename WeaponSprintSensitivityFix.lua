@@ -41,13 +41,13 @@ end
 function wssAddon:ApplyNormalCameraSettings()
     SetSetting(SETTING_TYPE_CAMERA, CAMERA_SETTING_SENSITIVITY_THIRD_PERSON, "" .. self.saved_variables.cam_sens.third_person)
     SetSetting(SETTING_TYPE_CAMERA, CAMERA_SETTING_SENSITIVITY_FIRST_PERSON, "" .. self.saved_variables.cam_sens.first_person)
-    d("Applying normal settings")
+    --d("Applying normal settings")
 end
 
 function wssAddon:ApplyFasterCameraSettings()
     SetSetting(SETTING_TYPE_CAMERA, CAMERA_SETTING_SENSITIVITY_THIRD_PERSON, "" .. self.saved_variables.cam_sens.third_person * 2)
     SetSetting(SETTING_TYPE_CAMERA, CAMERA_SETTING_SENSITIVITY_FIRST_PERSON, "" .. self.saved_variables.cam_sens.first_person * 2)
-    d("Applying sprint settings")
+   --d("Applying sprint settings")
 end
 
 -- sprint combat event does not trigger.
@@ -59,7 +59,7 @@ function wssAddon:CheckWeaponSprintStatus()
     local toggledSprintOn = false
     local toggledSprintOff = false
     if shift ~= wssAddon.sprint_button then
-        d("toggled sprint")
+        --d("toggled sprint")
         wssAddon.sprint_button = shift
         toggledSprintOn = shift == true
         toggledSprintOff = shift == false
@@ -69,7 +69,7 @@ function wssAddon:CheckWeaponSprintStatus()
     local weaponsEquipped = false
     local weaponsUnequipped = false
     if weaponStatus ~= wssAddon.weapons_sheathed then
-        d("weapon status")
+        --d("weapon status")
         weaponsEquipped = weaponStatus == false
         weaponsUnequipped = weaponStatus == true
     end
@@ -153,10 +153,11 @@ function wssAddon:Initialize()
             wssAddon:saveCamSens()
         elseif args[1] == "print" then
             d("Saved cam sens is: " .. wssAddon.saved_variables.cam_sens.third_person .. ", " .. wssAddon.saved_variables.cam_sens.first_person)
-            d("cam sens is: " .. GetSetting(SETTING_TYPE_CAMERA, CAMERA_SETTING_SENSITIVITY_THIRD_PERSON))
+            d("cam sens is: " .. GetSetting(SETTING_TYPE_CAMERA, CAMERA_SETTING_SENSITIVITY_THIRD_PERSON) .. ", " .. GetSetting(SETTING_TYPE_CAMERA, CAMERA_SETTING_SENSITIVITY_FIRST_PERSON))
+            d("If they don't match, run /camsens apply or /camsens clean")
         else
             d(wssAddon.saved_variables.cam_sens)
-            d("Invalid arguments!  \n\"/camsens apply\" to reapply saved cam sens.\n\"/camsens clean\" to update the cached cam sens")
+            d("Invalid arguments!\n\"/camsens apply\" to reapply saved cam sens.  Useful if you crash.\n\"/camsens clean\" to update the cached cam sens.  Use if you change your cam sens setting.")
         end
 
     end
