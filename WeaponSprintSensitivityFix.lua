@@ -134,7 +134,7 @@ function wssAddon:CheckWeaponSprintStatus()
     end
 
     if      (startedMoving or startedSprinting or weaponsEquipped)
-        and ((not weapons_sheathed) and moving and wssAddon.sprint_state == WSS_SPRINT_STATE_SPRINTING_HAS_STAM)
+        and ((not weaponStatus) and moving and wssAddon.sprint_state == WSS_SPRINT_STATE_SPRINTING_HAS_STAM)
     then
         wssAddon:ApplyFasterCameraSettings()
         --d("Sprointjing")
