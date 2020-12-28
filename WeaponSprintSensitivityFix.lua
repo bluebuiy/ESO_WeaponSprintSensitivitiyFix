@@ -16,9 +16,15 @@ WSS_SPRINT_STATE_NOT_SPRINTING = 3  -- sprint button is up, and player is not sp
     The only way to start sprinting after running out of sprint is to release and re-press the sprint button.
 --]]
 
+WSS_CAM_STATE_FAST = 0
+WSS_CAM_STATE_SLOW = 1
+
+wssAddon.camera_state = WSS_CAM_STATE_SLOW
 wssAddon.weapons_sheathed = true
 wssAddon.sprint_state = WSS_SPRINT_STATE_NOT_SPRINTING
 wssAddon.sprint_button = false
+wssAddon.moving = false
+wssAddon.position_cache = {x = 0, y = 0, z = 0}
 
 function wssAddon:OnAddOnLoaded(addonName)
     if addonName == RTIaddon.name then
@@ -52,7 +58,7 @@ end
 
 -- sprint combat event does not trigger.
 -- there's no event for weapon sheath/unsheath.
--- either of those two mean we have to loop to know when state changes.  Fortunately this is o(1) and has no leaks so should not be a perf hit.
+-- either of those two mean we have to loop to know when state changes.  
 
 function wssAddon:CheckWeaponSprintStatus()
     local shift = IsShiftKeyDown()
@@ -63,6 +69,24 @@ function wssAddon:CheckWeaponSprintStatus()
         wssAddon.sprint_button = shift
         toggledSprintOn = shift == true
         toggledSprintOff = shift == false
+    end
+
+    local moving = false
+    local id, x, y, z = GetUnitWorldPosition("player")
+    if (not (x == wssAddon.position_cache.x and z == wssAddon.position_cache.z)) then
+        moving = true
+        wssAddon.position_cache.x = x
+        wssAddon.position_cache.z = z
+    else
+        moving = false
+    end
+
+    local startedMoving = false
+    local stoppedMoving = false
+    if moving ~= wssAddon.moving then
+        startedMoving = moving == true
+        stoppedMoving = moving == false
+        wssAddon.moving = moving
     end
 
     local weaponStatus = ArePlayerWeaponsSheathed()
@@ -109,14 +133,20 @@ function wssAddon:CheckWeaponSprintStatus()
         end
     end
 
-    if      (stoppedSprinting and not wssAddon.weapons_sheathed)
-        or  (weaponsUnequipped and wssAddon.sprint_state == WSS_SPRINT_STATE_SPRINTING_HAS_STAM)
-    then
-        wssAddon:ApplyNormalCameraSettings()
-    elseif  (startedSprinting and not wssAddon.weapons_sheathed)
-        or  (weaponsEquipped and wssAddon.sprint_state == WSS_SPRINT_STATE_SPRINTING_HAS_STAM)
+    if      (startedMoving or startedSprinting or weaponsEquipped)
+        and ((not weapons_sheathed) and moving and wssAddon.sprint_state == WSS_SPRINT_STATE_SPRINTING_HAS_STAM)
     then
         wssAddon:ApplyFasterCameraSettings()
+        --d("Sprointjing")
+        wssAddon.camera_state = WSS_CAM_STATE_FAST
+    end
+
+    if      (stoppedMoving or stoppedSprinting or weaponsUnequipped)
+        and (wssAddon.camera_state == WSS_CAM_STATE_FAST)
+    then
+        wssAddon:ApplyNormalCameraSettings()
+        --d("Not prointging")
+        wssAddon.camera_state = WSS_CAM_STATE_SLOW
     end
 
     wssAddon.weapons_sheathed = weaponStatus
@@ -143,7 +173,7 @@ function wssAddon:Initialize()
 
     SLASH_COMMANDS["/camsens"] = function(argstr)
         local args = tokenizeCommand(argstr)
-        d(args)
+        --d(args)
         if args[1] == "apply" then
             -- apply cachced sens to game.  Useful if you crash while sens is modified.
             wssAddon:applyCamSens()
