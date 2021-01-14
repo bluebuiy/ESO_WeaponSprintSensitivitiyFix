@@ -25,6 +25,7 @@ wssAddon.sprint_state = WSS_SPRINT_STATE_NOT_SPRINTING
 wssAddon.sprint_button = false
 wssAddon.moving = false
 wssAddon.position_cache = {x = 0, y = 0, z = 0}
+wssAddon.res_status = false -- true = ghost form
 
 function wssAddon:OnAddOnLoaded(addonName)
     if addonName == RTIaddon.name then
@@ -115,7 +116,7 @@ function wssAddon:CheckWeaponSprintStatus()
     elseif wssAddon.sprint_state == WSS_SPRINT_STATE_SPRINTING_HAS_STAM then
         local cur, max, effMax = GetUnitPower("player", POWERTYPE_STAMINA)
         if toggledSprintOn then
-            d("SprintCamSens: State machine error B. Notify the addon author!") -- sprint button pressed while already sprinting
+            d("[WeapnSprintSens] State machine error B. Notify the addon author!") -- sprint button pressed while already sprinting
         elseif toggledSprintOff then
             -- don't care about our stamina, go right to the no sprint state.
             wssAddon.sprint_state = WSS_SPRINT_STATE_NOT_SPRINTING
@@ -126,7 +127,7 @@ function wssAddon:CheckWeaponSprintStatus()
         end
     elseif wssAddon.sprint_state == WSS_SPRINT_STATE_TRYING_SPRINT_NO_STAM then
         if toggledSprintOn then
-            d("SprintCamSens: State machine error C. Notify the addon author!") -- pressed sprint button when the sprint button should still be down
+            d("[WeapnSprintSens] State machine error C. Notify the addon author!") -- pressed sprint button when the sprint button should still be down
             stoppedSprinting = true
         elseif toggledSprintOff then
             wssAddon.sprint_state = WSS_SPRINT_STATE_NOT_SPRINTING
